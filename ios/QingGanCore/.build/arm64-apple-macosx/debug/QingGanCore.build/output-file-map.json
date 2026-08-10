@@ -1,0 +1,40 @@
+{
+  "": {
+    "swift-dependencies": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/primary.swiftdeps"
+  },
+  "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/Domain/TripModels.swift": {
+    "dependencies": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripModels.d",
+    "object": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripModels.swift.o",
+    "swiftmodule": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripModels~partial.swiftmodule",
+    "swift-dependencies": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripModels.swiftdeps",
+    "diagnostics": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripModels.dia"
+  },
+  "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/QingGanCore.swift": {
+    "dependencies": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/QingGanCore.d",
+    "object": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/QingGanCore.swift.o",
+    "swiftmodule": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/QingGanCore~partial.swiftmodule",
+    "swift-dependencies": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/QingGanCore.swiftdeps",
+    "diagnostics": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/QingGanCore.dia"
+  },
+  "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/Repositories/TripRepository.swift": {
+    "dependencies": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripRepository.d",
+    "object": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripRepository.swift.o",
+    "swiftmodule": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripRepository~partial.swiftmodule",
+    "swift-dependencies": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripRepository.swiftdeps",
+    "diagnostics": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripRepository.dia"
+  },
+  "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/Support/TripDateCodec.swift": {
+    "dependencies": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripDateCodec.d",
+    "object": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripDateCodec.swift.o",
+    "swiftmodule": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripDateCodec~partial.swiftmodule",
+    "swift-dependencies": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripDateCodec.swiftdeps",
+    "diagnostics": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripDateCodec.dia"
+  },
+  "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/UseCases/TodayUseCases.swift": {
+    "dependencies": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TodayUseCases.d",
+    "object": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TodayUseCases.swift.o",
+    "swiftmodule": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TodayUseCases~partial.swiftmodule",
+    "swift-dependencies": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TodayUseCases.swiftdeps",
+    "diagnostics": "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TodayUseCases.dia"
+  }
+}

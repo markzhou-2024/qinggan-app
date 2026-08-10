@@ -1,0 +1,714 @@
+{
+  "builtTestProducts" : [
+    {
+      "binaryPath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.xctest/Contents/MacOS/QingGanCorePackageTests",
+      "packagePath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore",
+      "productName" : "QingGanCorePackageTests"
+    }
+  ],
+  "copyCommands" : {
+    "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore_QingGanCoreTests.bundle/qinggan-itinerary.json" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Tests/QingGanCoreTests/Fixtures/qinggan-itinerary.json"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore_QingGanCoreTests.bundle/qinggan-itinerary.json"
+        }
+      ]
+    }
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.QingGanCore-arm64-apple-macosx-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/sources",
+      "importPath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/Domain/TripModels.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/QingGanCore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/Repositories/TripRepository.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/Support/TripDateCodec.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/UseCases/TodayUseCases.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "QingGanCore",
+      "moduleOutputPath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/Modules/QingGanCore.swiftmodule",
+      "objects" : [
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripModels.swift.o",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/QingGanCore.swift.o",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripRepository.swift.o",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripDateCodec.swift.o",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TodayUseCases.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j10",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/include/QingGanCore-Swift.h",
+        "-swift-version",
+        "6",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "qinggancore"
+      ],
+      "outputFileMapPath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripModels.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/QingGanCore.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripRepository.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripDateCodec.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TodayUseCases.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/Modules/QingGanCore.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/Domain/TripModels.swift",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/QingGanCore.swift",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/Repositories/TripRepository.swift",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/Support/TripDateCodec.swift",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/UseCases/TodayUseCases.swift"
+      ],
+      "tempsPath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.QingGanCorePackageTests-arm64-apple-macosx-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.build/sources",
+      "importPath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.derived/runner.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/Modules/QingGanCoreTests.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "QingGanCorePackageTests",
+      "moduleOutputPath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/Modules/QingGanCorePackageTests.swiftmodule",
+      "objects" : [
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.build/runner.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j10",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.build/include/QingGanCorePackageTests-Swift.h",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "qinggancore"
+      ],
+      "outputFileMapPath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/Modules/QingGanCorePackageTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.derived/runner.swift"
+      ],
+      "tempsPath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.QingGanCoreTests-arm64-apple-macosx-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCoreTests.build/sources",
+      "importPath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Tests/QingGanCoreTests/TodayDomainTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCoreTests.build/DerivedSources/resource_bundle_accessor.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "virtual",
+          "name" : "<QingGanCoreTests-arm64-apple-macosx-debug.module-resources>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/Modules/QingGanCore.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCoreTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "QingGanCoreTests",
+      "moduleOutputPath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/Modules/QingGanCoreTests.swiftmodule",
+      "objects" : [
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCoreTests.build/TodayDomainTests.swift.o",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCoreTests.build/resource_bundle_accessor.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j10",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_AVAILABLE",
+        "-module-cache-path",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-swift-version",
+        "6",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "qinggancore"
+      ],
+      "outputFileMapPath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCoreTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCoreTests.build/TodayDomainTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCoreTests.build/resource_bundle_accessor.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/Modules/QingGanCoreTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Tests/QingGanCoreTests/TodayDomainTests.swift",
+        "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCoreTests.build/DerivedSources/resource_bundle_accessor.swift"
+      ],
+      "tempsPath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCoreTests.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "QingGanCore" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "QingGanCore",
+      "-package-name",
+      "qinggancore",
+      "-c",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/Domain/TripModels.swift",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/QingGanCore.swift",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/Repositories/TripRepository.swift",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/Support/TripDateCodec.swift",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/UseCases/TodayUseCases.swift",
+      "-I",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j10",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/include/QingGanCore-Swift.h",
+      "-swift-version",
+      "6",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "qinggancore",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "QingGanCorePackageTests" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "QingGanCorePackageTests",
+      "-package-name",
+      "qinggancore",
+      "-c",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.derived/runner.swift",
+      "-I",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j10",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.build/include/QingGanCorePackageTests-Swift.h",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "qinggancore",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "QingGanCoreTests" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "QingGanCoreTests",
+      "-package-name",
+      "qinggancore",
+      "-c",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Tests/QingGanCoreTests/TodayDomainTests.swift",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCoreTests.build/DerivedSources/resource_bundle_accessor.swift",
+      "-I",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j10",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_AVAILABLE",
+      "-module-cache-path",
+      "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-swift-version",
+      "6",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "qinggancore",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "QingGanCore" : [
+
+    ],
+    "QingGanCorePackageTests" : [
+      "QingGanCoreTests",
+      "QingGanCore"
+    ],
+    "QingGanCoreTests" : [
+      "QingGanCore"
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+    "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.derived/runner.swift" : {
+      "inputs" : [
+
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.derived/runner.swift"
+        }
+      ]
+    }
+  },
+  "traitConfiguration" : {
+    "default" : {
+
+    }
+  },
+  "writeCommands" : {
+    "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/Domain/TripModels.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/QingGanCore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/Repositories/TripRepository.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/Support/TripDateCodec.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Sources/QingGanCore/UseCases/TodayUseCases.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/sources"
+    },
+    "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.derived/runner.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.build/sources"
+    },
+    "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/QingGanCore.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TodayUseCases.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripDateCodec.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripModels.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCore.build/TripRepository.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCoreTests.build/TodayDomainTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCoreTests.build/resource_bundle_accessor.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCorePackageTests.product/Objects.LinkFileList"
+    },
+    "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCoreTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/Tests/QingGanCoreTests/TodayDomainTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCoreTests.build/DerivedSources/resource_bundle_accessor.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/QingGanCoreTests.build/sources"
+    },
+    "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/mark/Documents/workspace/H5-app/ios/QingGanCore/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+    }
+  }
+}
