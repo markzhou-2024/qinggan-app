@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol TripRepository: Sendable {
+public protocol TripRepository {
     func itinerary() async throws -> Trip
 }
 
