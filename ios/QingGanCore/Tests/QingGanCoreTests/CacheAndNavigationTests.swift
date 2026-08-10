@@ -27,6 +27,19 @@ final class CacheAndNavigationTests: XCTestCase {
         XCTAssertEqual(trip.name, "青甘大环线10天自驾")
     }
 
+    func testCachedRepositoryReportsCacheOriginAfterRemoteFailure() async throws {
+        let fixture = try fixtureData(named: "qinggan-itinerary")
+        let repository = CachedTripRepository(
+            remote: StubRemoteDataSource(result: .failure(StubError.offline)),
+            store: MemoryTripStore(initialData: fixture)
+        )
+
+        let result = try await repository.itineraryWithOrigin()
+
+        XCTAssertEqual(result.origin, .cache)
+        XCTAssertEqual(result.trip.id, "qinggan-2026-family")
+    }
+
     func testMalformedRemotePayloadIsNotSavedAndDoesNotReplaceTheValidCache() async throws {
         let fixture = try fixtureData(named: "qinggan-itinerary")
         let remote = StubRemoteDataSource(result: .success(Data("not-json".utf8)) )
@@ -107,12 +120,12 @@ final class CacheAndNavigationTests: XCTestCase {
     }
 }
 
-private enum StubError: Error {
+private enum StubError: Error, Sendable {
     case offline
 }
 
 private struct StubRemoteDataSource: ItineraryRemoteDataSource {
-    let result: Result<Data, Error>
+    let result: Result<Data, StubError>
 
     func fetchItinerary() async throws -> Data {
         try result.get()

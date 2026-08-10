@@ -1,12 +1,32 @@
 import Foundation
 
-public protocol ItineraryRemoteDataSource {
+public protocol ItineraryRemoteDataSource: Sendable {
     func fetchItinerary() async throws -> Data
 }
 
-public protocol LocalTripStore {
+public protocol LocalTripStore: Sendable {
     func save(data: Data) async throws
     func load() async throws -> Data?
+}
+
+public enum TripDataOrigin: Equatable, Sendable {
+    case remote
+    case cache
+    case fixture
+}
+
+public struct TripFetchResult: Equatable, Sendable {
+    public let trip: Trip
+    public let origin: TripDataOrigin
+
+    public init(trip: Trip, origin: TripDataOrigin) {
+        self.trip = trip
+        self.origin = origin
+    }
+}
+
+public protocol TripDataOriginReporting: Sendable {
+    func itineraryWithOrigin() async throws -> TripFetchResult
 }
 
 public struct RemoteTripRepository: TripRepository {
@@ -24,7 +44,7 @@ public struct RemoteTripRepository: TripRepository {
 }
 
 /// Remote is authoritative when valid; the last validated document provides weak-network continuity.
-public struct CachedTripRepository: TripRepository {
+public struct CachedTripRepository: TripRepository, TripDataOriginReporting {
     private let remote: any ItineraryRemoteDataSource
     private let store: any LocalTripStore
     private let decoder: TripDecoder
@@ -40,16 +60,20 @@ public struct CachedTripRepository: TripRepository {
     }
 
     public func itinerary() async throws -> Trip {
+        try await itineraryWithOrigin().trip
+    }
+
+    public func itineraryWithOrigin() async throws -> TripFetchResult {
         do {
             let remoteData = try await remote.fetchItinerary()
             let trip = try decoder.decode(data: remoteData)
             try await store.save(data: remoteData)
-            return trip
+            return TripFetchResult(trip: trip, origin: .remote)
         } catch {
             guard let cachedData = try await store.load() else {
                 throw error
             }
-            return try decoder.decode(data: cachedData)
+            return TripFetchResult(trip: try decoder.decode(data: cachedData), origin: .cache)
         }
     }
 }

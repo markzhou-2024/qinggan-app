@@ -18,7 +18,13 @@ final class TodayViewModel {
     func load(now: Date = Date()) async {
         state = .loading
         do {
-            let trip = try await repository.itinerary()
+            let result: TripFetchResult
+            if let reportingRepository = repository as? any TripDataOriginReporting {
+                result = try await reportingRepository.itineraryWithOrigin()
+            } else {
+                result = TripFetchResult(trip: try await repository.itinerary(), origin: .fixture)
+            }
+            let trip = result.trip
             var calendar = Calendar(identifier: .gregorian)
             calendar.timeZone = TimeZone(identifier: "Asia/Shanghai")!
             guard let day = currentDayResolver.execute(trip: trip, on: now, calendar: calendar).day else {
@@ -30,7 +36,8 @@ final class TodayViewModel {
                 day: day,
                 nextStop: nextStop,
                 recommendedNavigationPoint: nextStop.flatMap { navigationPointResolver.execute(points: $0.navigationPoints) },
-                tonightStay: tonightResolver.execute(day: day)
+                tonightStay: tonightResolver.execute(day: day),
+                dataOrigin: result.origin
             ))
         } catch { state = .unavailable(error.localizedDescription) }
     }
@@ -41,4 +48,5 @@ struct TodaySnapshot: Equatable {
     let nextStop: TripStop?
     let recommendedNavigationPoint: NavigationPoint?
     let tonightStay: Stay?
+    let dataOrigin: TripDataOrigin
 }

@@ -14,6 +14,11 @@ struct TodayView: View {
                 case .unavailable(let message): ContentUnavailableView("今天暂无行程", systemImage: "calendar.badge.exclamationmark", description: Text(message))
                 case .ready(let snapshot):
                     ScrollView { VStack(alignment: .leading, spacing: 20) {
+                        if snapshot.dataOrigin == .cache {
+                            Label("当前使用离线行程数据", systemImage: "wifi.slash")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                        }
                         DayHeaderSection(snapshot: snapshot)
                         JourneyProgressSection(stops: snapshot.day.stops)
                         NextStopSection(snapshot: snapshot)
