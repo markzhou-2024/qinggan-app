@@ -5,3 +5,7 @@ ios/**/.build/
 ios/**/DerivedData/
 ios/**/*.xcuserstate
 ios/**/xcuserdata/
+
+# JVM build output and Finder metadata
+backend/target/
+.DS_Store
