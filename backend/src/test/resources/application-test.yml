@@ -7,13 +7,5 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-  data:
-    redis:
-      repositories:
-        enabled: false
   flyway:
     enabled: true
-management:
-  health:
-    redis:
-      enabled: false

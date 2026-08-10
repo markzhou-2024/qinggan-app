@@ -14,14 +14,6 @@ services:
     volumes:
       - qinggan-mysql:/var/lib/mysql
 
-  redis:
-    image: redis:7-alpine
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-
   backend:
     build:
       context: ./backend
@@ -29,11 +21,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/qinggan?useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: qinggan
       SPRING_DATASOURCE_PASSWORD: qinggan
-      SPRING_DATA_REDIS_HOST: redis
     depends_on:
       mysql:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     ports:
       - "8080:8080"

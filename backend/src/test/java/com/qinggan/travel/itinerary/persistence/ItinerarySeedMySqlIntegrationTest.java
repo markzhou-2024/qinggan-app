@@ -33,8 +33,6 @@ class ItinerarySeedMySqlIntegrationTest {
         registry.add("spring.datasource.driver-class-name", mysql::getDriverClassName);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
         registry.add("spring.flyway.enabled", () -> true);
-        registry.add("spring.data.redis.repositories.enabled", () -> false);
-        registry.add("management.health.redis.enabled", () -> false);
     }
 
     @Autowired
