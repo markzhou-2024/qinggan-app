@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDisplayName</key>
+    <string>青甘随行</string>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>iosamap</string>
+        <string>baidumap</string>
+    </array>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>仅在使用 App 时用于改善今天行程的距离与区域提示。</string>
+</dict>
+</plist>

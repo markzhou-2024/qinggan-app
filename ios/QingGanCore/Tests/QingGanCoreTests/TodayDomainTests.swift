@@ -35,6 +35,13 @@ final class TodayDomainTests: XCTestCase {
         XCTAssertEqual(result?.place.name, "大柴旦翡翠湖")
     }
 
+    func testNextStopResolverDoesNotNavigateBackToPlannedOrigin() {
+        let origin = stop(id: "origin", name: "茶卡镇", type: .origin, status: .planned)
+        let next = stop(id: "chaka", name: "茶卡天空壹号", type: .scenic, status: .planned)
+
+        XCTAssertEqual(ResolveNextStopUseCase().execute(stops: [origin, next])?.place.name, "茶卡天空壹号")
+    }
+
     func testRecommendedNavigationResolverUsesRecommendedPointWithoutInventingCoordinates() {
         let pendingParking = NavigationPoint(
             id: "emerald-parking",

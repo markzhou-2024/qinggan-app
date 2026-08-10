@@ -23,7 +23,7 @@ public struct ResolveNextStopUseCase: Sendable {
     public func execute(stops: [TripStop]) -> TripStop? {
         stops
             .sorted { $0.sequence < $1.sequence }
-            .first { $0.status != .completed && $0.status != .skipped }
+            .first { $0.type != .origin && $0.status != .completed && $0.status != .skipped }
     }
 }
 
