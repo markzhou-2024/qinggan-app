@@ -9,6 +9,10 @@ spring:
     open-in-view: false
   flyway:
     enabled: true
+qinggan:
+  family:
+    join-token: ${QINGGAN_FAMILY_JOIN_TOKEN:}
+    device-token-signing-secret: ${QINGGAN_DEVICE_TOKEN_SIGNING_SECRET:}
 management:
   endpoints:
     web:
