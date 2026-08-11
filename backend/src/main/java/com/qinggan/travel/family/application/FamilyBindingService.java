@@ -1,6 +1,10 @@
 package com.qinggan.travel.family.application;
 
-import com.qinggan.travel.family.api.FamilyApiException;
+import com.qinggan.travel.family.api.dto.BindDeviceRequest;
+import com.qinggan.travel.family.api.dto.DeviceBindingResponse;
+import com.qinggan.travel.family.api.dto.FamilyRoleOptionResponse;
+import com.qinggan.travel.family.api.dto.FamilyRolesResponse;
+import com.qinggan.travel.family.api.dto.TakeoverDeviceRequest;
 import com.qinggan.travel.family.domain.BindingActionType;
 import com.qinggan.travel.family.domain.DeviceStatus;
 import com.qinggan.travel.family.domain.FamilyRole;
@@ -34,6 +38,7 @@ public class FamilyBindingService {
     private final DeviceTokenService deviceTokenService;
     private final TokenHashingService tokenHashingService;
     private final FamilyJoinTokenVerifier joinTokenVerifier;
+    private final DeviceAuthorizationService deviceAuthorizationService;
 
     public FamilyBindingService(
         FamilyTripJpaRepository tripRepository,
@@ -42,7 +47,8 @@ public class FamilyBindingService {
         TripDeviceBindingActionJpaRepository bindingActionRepository,
         DeviceTokenService deviceTokenService,
         TokenHashingService tokenHashingService,
-        FamilyJoinTokenVerifier joinTokenVerifier
+        FamilyJoinTokenVerifier joinTokenVerifier,
+        DeviceAuthorizationService deviceAuthorizationService
     ) {
         this.tripRepository = tripRepository;
         this.roleBindingRepository = roleBindingRepository;
@@ -51,255 +57,317 @@ public class FamilyBindingService {
         this.deviceTokenService = deviceTokenService;
         this.tokenHashingService = tokenHashingService;
         this.joinTokenVerifier = joinTokenVerifier;
+        this.deviceAuthorizationService = deviceAuthorizationService;
     }
 
     @Transactional(readOnly = true)
-    public RolesResult listRoles(String tripCode, String joinToken) {
-        joinTokenVerifier.requireValid(joinToken);
-        Trip trip = requireTrip(tripCode);
-        List<RoleView> roles = roleBindingRepository.findByTripIdOrderByRoleAsc(trip.getId()).stream()
-            .sorted(Comparator.comparingInt(binding -> binding.getRole().ordinal()))
-            .map(binding -> new RoleView(
-                binding.getRole().name(),
-                binding.getDisplayName(),
-                binding.isAvailable(),
-                binding.getBindingVersion()))
-            .toList();
-        return new RolesResult(tripCode, roles);
+    public FamilyRolesResponse roles(String tripCode, String authorizationHeader) {
+        joinTokenVerifier.requireValid(authorizationHeader);
+        return buildRoles(requireTrip(tripCode));
     }
 
     @Transactional
-    public BindingResult bind(String tripCode, String joinToken, BindingCommand command) {
-        joinTokenVerifier.requireValid(joinToken);
-        validateCommand(command);
-        Trip trip = requireTrip(tripCode);
-        FamilyRole role = parseRole(command.role());
+    public DeviceBindingResponse bind(
+        String tripCode,
+        String authorizationHeader,
+        BindDeviceRequest request
+    ) {
+        joinTokenVerifier.requireValid(authorizationHeader);
+        validateBindRequest(request);
+        Trip trip = requireTripForUpdate(tripCode);
+        FamilyRole role = parseRole(request.role());
+        FamilyRoleBinding binding = requireRoleForUpdate(trip, role);
 
-        BindingResult replay = replayIfPresent(trip, tripCode, command, role, BindingActionType.BIND);
-        if (replay != null) {
-            return replay;
-        }
-
-        FamilyRoleBinding binding = roleBindingRepository.findForUpdate(trip.getId(), role)
-            .orElseThrow(() -> conflict("ROLE_NOT_INITIALIZED", "Family role is not initialized for this trip"));
-
-        replay = replayIfPresent(trip, tripCode, command, role, BindingActionType.BIND);
+        DeviceBindingResponse replay = replayIfPresent(
+            trip, tripCode, request.requestId(), request.deviceId(), request.deviceName(), role, BindingActionType.BIND);
         if (replay != null) {
             return replay;
         }
         if (!binding.isAvailable()) {
-            throw conflict("ROLE_ALREADY_BOUND", "Family role is already bound; use takeover to replace the device");
+            throw conflict(
+                "ROLE_ALREADY_BOUND",
+                "Family role is already bound; use takeover to replace the device",
+                buildRoles(trip));
         }
-        rejectExistingDevice(trip.getId(), command.deviceId());
+        rejectExistingDevice(trip, request.deviceId());
 
         long bindingVersion = binding.getBindingVersion() + 1;
         Instant now = Instant.now();
-        String deviceToken = deviceTokenService.issue(tripCode, command.deviceId(), bindingVersion, command.requestId());
-        String deviceTokenHash = tokenHashingService.sha256Hex(deviceToken);
-
+        String deviceToken = deviceTokenService.issue(
+            tripCode, request.deviceId(), bindingVersion, request.requestId());
         TripDevice device = TripDevice.active(
-            trip.getId(), command.deviceId(), role, command.deviceName(), deviceTokenHash, bindingVersion, now);
+            trip.getId(),
+            request.deviceId(),
+            role,
+            request.deviceName(),
+            tokenHashingService.sha256Hex(deviceToken),
+            bindingVersion,
+            now);
+
         deviceRepository.save(device);
-        binding.activate(command.deviceId(), bindingVersion, now);
+        binding.activate(request.deviceId(), bindingVersion, now);
         roleBindingRepository.save(binding);
         bindingActionRepository.save(TripDeviceBindingAction.create(
-            trip.getId(), command.requestId(), BindingActionType.BIND, role,
-            command.deviceId(), null, bindingVersion, now));
+            trip.getId(),
+            request.requestId(),
+            BindingActionType.BIND,
+            role,
+            request.deviceId(),
+            null,
+            bindingVersion,
+            now));
 
-        return bindingResult(tripCode, role, command.deviceId(), bindingVersion, deviceToken);
+        return bindingResponse(
+            tripCode, role, request.deviceId(), request.deviceName(), bindingVersion, deviceToken);
     }
 
     @Transactional
-    public BindingResult takeover(String tripCode, String joinToken, BindingCommand command) {
-        joinTokenVerifier.requireValid(joinToken);
-        validateCommand(command);
-        Trip trip = requireTrip(tripCode);
-        FamilyRole role = parseRole(command.role());
+    public DeviceBindingResponse takeover(
+        String tripCode,
+        String authorizationHeader,
+        TakeoverDeviceRequest request
+    ) {
+        joinTokenVerifier.requireValid(authorizationHeader);
+        validateTakeoverRequest(request);
+        Trip trip = requireTripForUpdate(tripCode);
+        FamilyRole role = parseRole(request.role());
+        FamilyRoleBinding binding = requireRoleForUpdate(trip, role);
 
-        BindingResult replay = replayIfPresent(trip, tripCode, command, role, BindingActionType.TAKEOVER);
+        if (!request.confirmed()) {
+            throw new FamilyBindingException(
+                HttpStatus.BAD_REQUEST,
+                "TAKEOVER_CONFIRMATION_REQUIRED",
+                "Takeover requires confirmed=true");
+        }
+
+        DeviceBindingResponse replay = replayIfPresent(
+            trip,
+            tripCode,
+            request.requestId(),
+            request.deviceId(),
+            request.deviceName(),
+            role,
+            BindingActionType.TAKEOVER);
         if (replay != null) {
             return replay;
         }
-
-        FamilyRoleBinding binding = roleBindingRepository.findForUpdate(trip.getId(), role)
-            .orElseThrow(() -> conflict("ROLE_NOT_INITIALIZED", "Family role is not initialized for this trip"));
-
-        replay = replayIfPresent(trip, tripCode, command, role, BindingActionType.TAKEOVER);
-        if (replay != null) {
-            return replay;
+        if (binding.isAvailable()) {
+            throw conflict("ROLE_NOT_BOUND", "Family role is not currently bound", buildRoles(trip));
         }
-        rejectExistingDevice(trip.getId(), command.deviceId());
+        rejectExistingDevice(trip, request.deviceId());
 
         Instant now = Instant.now();
         String replacedDeviceId = binding.getActiveDeviceId();
-        if (replacedDeviceId != null) {
-            TripDevice replaced = deviceRepository.findByTripIdAndDeviceIdAndStatus(
-                    trip.getId(), replacedDeviceId, DeviceStatus.ACTIVE)
-                .orElseThrow(() -> conflict("BINDING_STATE_INVALID", "Active role binding has no active device record"));
-            replaced.revoke(now);
-            deviceRepository.save(replaced);
+        TripDevice replaced = deviceRepository.findByTripIdAndDeviceIdAndStatus(
+                trip.getId(), replacedDeviceId, DeviceStatus.ACTIVE)
+            .orElseThrow(() -> conflict(
+                "BINDING_STATE_INVALID",
+                "Active role binding has no active device record",
+                buildRoles(trip)));
+        if (replaced.getRole() != role || replaced.getBindingVersion() != binding.getBindingVersion()) {
+            throw conflict("BINDING_STATE_INVALID", "Active role binding and device record disagree", buildRoles(trip));
         }
 
         long bindingVersion = binding.getBindingVersion() + 1;
-        String deviceToken = deviceTokenService.issue(tripCode, command.deviceId(), bindingVersion, command.requestId());
-        String deviceTokenHash = tokenHashingService.sha256Hex(deviceToken);
+        String deviceToken = deviceTokenService.issue(
+            tripCode, request.deviceId(), bindingVersion, request.requestId());
         TripDevice replacement = TripDevice.active(
-            trip.getId(), command.deviceId(), role, command.deviceName(), deviceTokenHash, bindingVersion, now);
+            trip.getId(),
+            request.deviceId(),
+            role,
+            request.deviceName(),
+            tokenHashingService.sha256Hex(deviceToken),
+            bindingVersion,
+            now);
+
+        replaced.revoke(now);
+        deviceRepository.save(replaced);
         deviceRepository.save(replacement);
-        binding.activate(command.deviceId(), bindingVersion, now);
+        binding.activate(request.deviceId(), bindingVersion, now);
         roleBindingRepository.save(binding);
         bindingActionRepository.save(TripDeviceBindingAction.create(
-            trip.getId(), command.requestId(), BindingActionType.TAKEOVER, role,
-            command.deviceId(), replacedDeviceId, bindingVersion, now));
+            trip.getId(),
+            request.requestId(),
+            BindingActionType.TAKEOVER,
+            role,
+            request.deviceId(),
+            replacedDeviceId,
+            bindingVersion,
+            now));
 
-        return bindingResult(tripCode, role, command.deviceId(), bindingVersion, deviceToken);
+        return bindingResponse(
+            tripCode, role, request.deviceId(), request.deviceName(), bindingVersion, deviceToken);
     }
 
     @Transactional
-    public DeviceIdentity authenticate(String tripCode, String authorizationHeader) {
-        Trip trip = requireTrip(tripCode);
-        String token = bearerToken(authorizationHeader);
-        String tokenHash = tokenHashingService.sha256Hex(token);
-        TripDevice device = deviceRepository.findByTripIdAndDeviceTokenHashAndStatus(
-                trip.getId(), tokenHash, DeviceStatus.ACTIVE)
+    public DeviceBindingResponse currentBinding(String tripCode, String deviceAuthorizationHeader) {
+        AuthenticatedDevice authenticated = deviceAuthorizationService.requireActiveDevice(
+            tripCode, deviceAuthorizationHeader);
+        TripDevice device = deviceRepository.findByTripIdAndDeviceIdAndStatus(
+                authenticated.tripDatabaseId(), authenticated.deviceId(), DeviceStatus.ACTIVE)
             .orElseThrow(this::invalidDeviceToken);
-        FamilyRoleBinding binding = roleBindingRepository.findByTripIdAndActiveDeviceId(
-                trip.getId(), device.getDeviceId())
-            .orElseThrow(this::invalidDeviceToken);
-        if (binding.getRole() != device.getRole() || binding.getBindingVersion() != device.getBindingVersion()) {
-            throw invalidDeviceToken();
-        }
-        device.touch(Instant.now());
-        deviceRepository.save(device);
-        return new DeviceIdentity(
+        return bindingResponse(
             tripCode,
-            device.getRole().name(),
-            device.getRole().displayName(),
-            device.getDeviceId(),
+            authenticated.role(),
+            authenticated.deviceId(),
             device.getDeviceName(),
-            device.getBindingVersion());
+            authenticated.bindingVersion(),
+            null);
     }
 
-    private BindingResult replayIfPresent(
+    private DeviceBindingResponse replayIfPresent(
         Trip trip,
         String tripCode,
-        BindingCommand command,
+        String requestId,
+        String deviceId,
+        String deviceName,
         FamilyRole role,
         BindingActionType expectedAction
     ) {
         Optional<TripDeviceBindingAction> existing = bindingActionRepository.findByTripIdAndRequestId(
-            trip.getId(), command.requestId());
+            trip.getId(), requestId);
         if (existing.isEmpty()) {
             return null;
         }
         TripDeviceBindingAction action = existing.get();
         if (action.getActionType() != expectedAction
             || action.getRole() != role
-            || !Objects.equals(action.getNewDeviceId(), command.deviceId())) {
-            throw conflict("IDEMPOTENCY_CONFLICT", "requestId was already used for a different binding action");
+            || !Objects.equals(action.getNewDeviceId(), deviceId)) {
+            throw conflict("IDEMPOTENCY_CONFLICT", "requestId was already used for a different binding action", buildRoles(trip));
         }
-        TripDevice device = deviceRepository.findByTripIdAndDeviceId(trip.getId(), command.deviceId())
-            .orElseThrow(() -> conflict("BINDING_STATE_INVALID", "Binding action has no device record"));
-        if (!Objects.equals(device.getDeviceName(), command.deviceName())
+        TripDevice device = deviceRepository.findByTripIdAndDeviceId(trip.getId(), deviceId)
+            .orElseThrow(() -> conflict(
+                "BINDING_STATE_INVALID", "Binding action has no device record", buildRoles(trip)));
+        if (!Objects.equals(device.getDeviceName(), deviceName)
             || device.getBindingVersion() != action.getBindingVersion()) {
-            throw conflict("IDEMPOTENCY_CONFLICT", "requestId was replayed with different binding data");
+            throw conflict("IDEMPOTENCY_CONFLICT", "requestId was replayed with different binding data", buildRoles(trip));
         }
-        String token = deviceTokenService.issue(
-            tripCode, command.deviceId(), action.getBindingVersion(), command.requestId());
-        return bindingResult(tripCode, role, command.deviceId(), action.getBindingVersion(), token);
+        FamilyRoleBinding currentBinding = roleBindingRepository.findByTripIdAndActiveDeviceId(
+                trip.getId(), deviceId)
+            .orElseThrow(() -> conflict(
+                "BINDING_SUPERSEDED", "Historical binding has been superseded", buildRoles(trip)));
+        if (device.getStatus() != DeviceStatus.ACTIVE
+            || currentBinding.getRole() != role
+            || currentBinding.getBindingVersion() != action.getBindingVersion()) {
+            throw conflict("BINDING_SUPERSEDED", "Historical binding has been superseded", buildRoles(trip));
+        }
+
+        String token = deviceTokenService.issue(tripCode, deviceId, action.getBindingVersion(), requestId);
+        return bindingResponse(
+            tripCode, role, deviceId, deviceName, action.getBindingVersion(), token);
     }
 
-    private void rejectExistingDevice(Long tripId, String deviceId) {
-        if (deviceRepository.findByTripIdAndDeviceId(tripId, deviceId).isPresent()) {
-            throw conflict("DEVICE_ALREADY_BOUND", "deviceId is already registered for this trip");
+    private FamilyRolesResponse buildRoles(Trip trip) {
+        List<FamilyRoleOptionResponse> roles = roleBindingRepository.findByTripIdOrderByRoleAsc(trip.getId()).stream()
+            .sorted(Comparator.comparingInt(binding -> binding.getRole().ordinal()))
+            .map(binding -> {
+                String deviceName = null;
+                if (binding.getActiveDeviceId() != null) {
+                    deviceName = deviceRepository.findByTripIdAndDeviceId(trip.getId(), binding.getActiveDeviceId())
+                        .map(TripDevice::getDeviceName)
+                        .orElse(null);
+                }
+                return new FamilyRoleOptionResponse(
+                    binding.getRole().name(),
+                    binding.getDisplayName(),
+                    binding.isAvailable() ? "AVAILABLE" : "BOUND",
+                    deviceName,
+                    binding.getBoundAt(),
+                    binding.getBindingVersion());
+            })
+            .toList();
+        return new FamilyRolesResponse(trip.getCode(), roles);
+    }
+
+    private void rejectExistingDevice(Trip trip, String deviceId) {
+        if (deviceRepository.findByTripIdAndDeviceId(trip.getId(), deviceId).isPresent()) {
+            throw conflict("DEVICE_ALREADY_BOUND", "deviceId is already registered for this trip", buildRoles(trip));
         }
+    }
+
+    private FamilyRoleBinding requireRoleForUpdate(Trip trip, FamilyRole role) {
+        return roleBindingRepository.findForUpdate(trip.getId(), role)
+            .orElseThrow(() -> conflict(
+                "ROLE_NOT_INITIALIZED", "Family role is not initialized for this trip", buildRoles(trip)));
     }
 
     private Trip requireTrip(String tripCode) {
         return tripRepository.findByCode(tripCode)
-            .orElseThrow(() -> new FamilyApiException(HttpStatus.NOT_FOUND, "TRIP_NOT_FOUND", "Trip was not found"));
+            .orElseThrow(() -> new FamilyBindingException(
+                HttpStatus.NOT_FOUND, "TRIP_NOT_FOUND", "Trip was not found"));
+    }
+
+    private Trip requireTripForUpdate(String tripCode) {
+        return tripRepository.findByCodeForUpdate(tripCode)
+            .orElseThrow(() -> new FamilyBindingException(
+                HttpStatus.NOT_FOUND, "TRIP_NOT_FOUND", "Trip was not found"));
     }
 
     private FamilyRole parseRole(String rawRole) {
         try {
             return FamilyRole.valueOf(rawRole);
         } catch (IllegalArgumentException | NullPointerException exception) {
-            throw new FamilyApiException(HttpStatus.BAD_REQUEST, "INVALID_ROLE", "Family role is invalid");
+            throw new FamilyBindingException(HttpStatus.BAD_REQUEST, "INVALID_ROLE", "Family role is invalid");
         }
     }
 
-    private void validateCommand(BindingCommand command) {
-        if (command == null) {
+    private void validateBindRequest(BindDeviceRequest request) {
+        if (request == null) {
             throw badRequest("INVALID_BINDING_REQUEST", "Binding request is required");
         }
-        requireLength(command.requestId(), 36, "requestId");
-        requireLength(command.deviceId(), 64, "deviceId");
-        requireLength(command.deviceName(), 128, "deviceName");
-        requireLength(command.role(), 32, "role");
+        validateBindingFields(request.requestId(), request.deviceId(), request.role(), request.deviceName());
+    }
+
+    private void validateTakeoverRequest(TakeoverDeviceRequest request) {
+        if (request == null) {
+            throw badRequest("INVALID_BINDING_REQUEST", "Takeover request is required");
+        }
+        validateBindingFields(request.requestId(), request.deviceId(), request.role(), request.deviceName());
+    }
+
+    private void validateBindingFields(String requestId, String deviceId, String role, String deviceName) {
+        requireLength(requestId, 36, "requestId");
+        requireLength(deviceId, 64, "deviceId");
+        requireLength(role, 32, "role");
+        requireLength(deviceName, 128, "deviceName");
     }
 
     private void requireLength(String value, int maxLength, String field) {
         if (value == null || value.isBlank() || value.length() > maxLength) {
-            throw badRequest("INVALID_BINDING_REQUEST", field + " is required and must be at most " + maxLength + " characters");
+            throw badRequest(
+                "INVALID_BINDING_REQUEST",
+                field + " is required and must be at most " + maxLength + " characters");
         }
     }
 
-    private String bearerToken(String authorizationHeader) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw invalidDeviceToken();
-        }
-        String token = authorizationHeader.substring("Bearer ".length()).trim();
-        if (token.isEmpty() || token.contains(" ")) {
-            throw invalidDeviceToken();
-        }
-        return token;
-    }
-
-    private BindingResult bindingResult(
-        String tripCode, FamilyRole role, String deviceId, long bindingVersion, String deviceToken
-    ) {
-        return new BindingResult(
-            tripCode, role.name(), role.displayName(), deviceId, bindingVersion, deviceToken);
-    }
-
-    private FamilyApiException invalidDeviceToken() {
-        return new FamilyApiException(HttpStatus.UNAUTHORIZED, "INVALID_DEVICE_TOKEN", "Device Token is invalid or revoked");
-    }
-
-    private FamilyApiException conflict(String code, String message) {
-        return new FamilyApiException(HttpStatus.CONFLICT, code, message);
-    }
-
-    private FamilyApiException badRequest(String code, String message) {
-        return new FamilyApiException(HttpStatus.BAD_REQUEST, code, message);
-    }
-
-    public record BindingCommand(String requestId, String role, String deviceId, String deviceName) {
-    }
-
-    public record RoleView(String role, String displayName, boolean available, long bindingVersion) {
-    }
-
-    public record RolesResult(String tripId, List<RoleView> roles) {
-    }
-
-    public record BindingResult(
-        String tripId,
-        String role,
-        String displayName,
+    private DeviceBindingResponse bindingResponse(
+        String tripCode,
+        FamilyRole role,
         String deviceId,
+        String deviceName,
         long bindingVersion,
         String deviceToken
     ) {
+        return new DeviceBindingResponse(
+            tripCode,
+            role.name(),
+            role.displayName(),
+            deviceId,
+            deviceName,
+            bindingVersion,
+            deviceToken);
     }
 
-    public record DeviceIdentity(
-        String tripId,
-        String role,
-        String displayName,
-        String deviceId,
-        String deviceName,
-        long bindingVersion
-    ) {
+    private FamilyBindingException invalidDeviceToken() {
+        return new FamilyBindingException(
+            HttpStatus.UNAUTHORIZED, "INVALID_DEVICE_TOKEN", "Device Token is invalid or revoked");
+    }
+
+    private FamilyBindingException conflict(String code, String message, FamilyRolesResponse latestRoles) {
+        return new FamilyBindingException(HttpStatus.CONFLICT, code, message, latestRoles);
+    }
+
+    private FamilyBindingException badRequest(String code, String message) {
+        return new FamilyBindingException(HttpStatus.BAD_REQUEST, code, message);
     }
 }
