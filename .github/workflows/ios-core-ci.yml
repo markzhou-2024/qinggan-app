@@ -28,7 +28,7 @@ jobs:
       - name: Run QingGanCore tests
         run: swift test --package-path ios/QingGanCore
 
-      - name: Select and boot iPhone simulator
+      - name: Select available iPhone simulator
         id: simulator
         shell: bash
         run: |
@@ -38,8 +38,6 @@ jobs:
             xcrun simctl list devices available
             exit 1
           fi
-          xcrun simctl boot "$DEVICE_ID" || true
-          xcrun simctl bootstatus "$DEVICE_ID" -b
           echo "device_id=$DEVICE_ID" >> "$GITHUB_OUTPUT"
 
       - name: Run QingGanApp runtime configuration tests
