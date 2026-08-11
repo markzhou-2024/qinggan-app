@@ -1,6 +1,6 @@
 package com.qinggan.travel.family.security;
 
-import com.qinggan.travel.family.api.FamilyApiException;
+import com.qinggan.travel.family.application.FamilyBindingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import org.springframework.http.HttpStatus;
@@ -15,12 +15,26 @@ public final class FamilyJoinTokenVerifier {
         this.expectedToken = properties.joinToken().getBytes(StandardCharsets.UTF_8);
     }
 
-    public void requireValid(String suppliedToken) {
-        byte[] supplied = suppliedToken == null
-            ? new byte[0]
-            : suppliedToken.getBytes(StandardCharsets.UTF_8);
-        if (expectedToken.length == 0 || supplied.length == 0 || !MessageDigest.isEqual(expectedToken, supplied)) {
-            throw new FamilyApiException(HttpStatus.UNAUTHORIZED, "INVALID_JOIN_TOKEN", "Family Join Token is invalid");
+    public void requireValid(String authorizationHeader) {
+        byte[] supplied = bearerToken(authorizationHeader).getBytes(StandardCharsets.UTF_8);
+        if (expectedToken.length == 0 || !MessageDigest.isEqual(expectedToken, supplied)) {
+            throw invalidJoinToken();
         }
+    }
+
+    private String bearerToken(String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw invalidJoinToken();
+        }
+        String token = authorizationHeader.substring("Bearer ".length()).trim();
+        if (token.isEmpty() || token.contains(" ")) {
+            throw invalidJoinToken();
+        }
+        return token;
+    }
+
+    private FamilyBindingException invalidJoinToken() {
+        return new FamilyBindingException(
+            HttpStatus.UNAUTHORIZED, "INVALID_JOIN_TOKEN", "Family Join Token is invalid");
     }
 }
