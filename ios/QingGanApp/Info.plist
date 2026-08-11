@@ -10,6 +10,10 @@
 	<string>APPL</string>
 	<key>CFBundleDisplayName</key>
     <string>青甘随行</string>
+    <key>QINGGAN_API_BASE_URL</key>
+    <string>$(QINGGAN_API_BASE_URL)</string>
+    <key>QINGGAN_TRIP_ID</key>
+    <string>$(QINGGAN_TRIP_ID)</string>
     <key>LSApplicationQueriesSchemes</key>
     <array>
         <string>iosamap</string>
