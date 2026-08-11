@@ -24,6 +24,64 @@ final class TodayDomainTests: XCTestCase {
         XCTAssertEqual(current.day?.number, 4)
     }
 
+    func testChangingPlannedStartDateShiftsAllResolvedDayDatesWithoutChangingDayNumbers() throws {
+        let trip = try decodedFixture(plannedStartDate: "2026-08-15", actualStartDate: nil)
+        let current = ResolveCurrentTripDayUseCase().execute(
+            trip: trip,
+            on: try date("2026-08-18"),
+            calendar: shanghaiCalendar()
+        )
+
+        XCTAssertEqual(current.phase, .inTrip)
+        XCTAssertEqual(current.day?.number, 4)
+        XCTAssertEqual(current.day?.date, try date("2026-08-18"))
+        XCTAssertEqual(trip.days.map(\.number), Array(1...10))
+    }
+
+    func testCurrentDayResolutionReportsPreTripAndPostTrip() throws {
+        let trip = try decodedFixture(plannedStartDate: "2026-08-15", actualStartDate: nil)
+        let resolver = ResolveCurrentTripDayUseCase()
+
+        XCTAssertEqual(resolver.execute(trip: trip, on: try date("2026-08-14"), calendar: shanghaiCalendar()).phase, .preTrip)
+        XCTAssertEqual(resolver.execute(trip: trip, on: try date("2026-08-25"), calendar: shanghaiCalendar()).phase, .postTrip)
+    }
+
+    func testActualStartDateOverridesPlannedStartDate() throws {
+        let trip = try decodedFixture(plannedStartDate: "2026-08-13", actualStartDate: "2026-08-15")
+        let current = ResolveCurrentTripDayUseCase().execute(
+            trip: trip,
+            on: try date("2026-08-15"),
+            calendar: shanghaiCalendar()
+        )
+
+        XCTAssertEqual(trip.effectiveStartDate, try date("2026-08-15"))
+        XCTAssertEqual(current.phase, .inTrip)
+        XCTAssertEqual(current.day?.number, 1)
+    }
+
+    func testStartTripUseCaseLocksEffectiveDateToActualStartDate() throws {
+        let configuration = TripRuntimeConfiguration(
+            plannedStartDate: try date("2026-08-13"), actualStartDate: nil, status: .planning
+        )
+
+        let started = StartTripUseCase().execute(current: configuration, actualStartDate: try date("2026-08-15"))
+
+        XCTAssertEqual(started.status, .started)
+        XCTAssertEqual(started.effectiveStartDate, try date("2026-08-15"))
+    }
+
+    func testUpdatePlannedStartDateDoesNotRewriteCanonicalDayNumbers() throws {
+        let configuration = TripRuntimeConfiguration(
+            plannedStartDate: try date("2026-08-13"), actualStartDate: nil, status: .planning
+        )
+
+        let updated = UpdatePlannedStartDateUseCase().execute(current: configuration, plannedStartDate: try date("2026-08-15"))
+
+        XCTAssertEqual(updated.plannedStartDate, try date("2026-08-15"))
+        XCTAssertNil(updated.actualStartDate)
+        XCTAssertEqual(updated.status, .planning)
+    }
+
     func testNextStopResolverSkipsOriginCompletedAndSkippedStops() {
         let origin = stop(id: "origin", name: "茶卡镇", type: .origin, status: .completed)
         let completed = stop(id: "chaka", name: "茶卡天空壹号", type: .scenic, status: .completed)
@@ -69,8 +127,16 @@ final class TodayDomainTests: XCTestCase {
         XCTAssertEqual(ResolveTonightStayUseCase().execute(day: day)?.hotelName, "大柴旦镇住宿（待确认）")
     }
 
-    private func decodedFixture() throws -> Trip {
-        try TripDecoder().decode(data: fixtureData(named: "qinggan-itinerary"))
+    private func decodedFixture(plannedStartDate: String? = nil, actualStartDate: String? = nil) throws -> Trip {
+        var object = try JSONSerialization.jsonObject(with: fixtureData(named: "qinggan-itinerary")) as! [String: Any]
+        if let plannedStartDate {
+            object["startDate"] = plannedStartDate
+            object["endDate"] = "2026-08-24"
+        }
+        if let actualStartDate { object["actualStartDate"] = actualStartDate }
+        object["status"] = "PLANNING"
+        object["timeZone"] = "Asia/Shanghai"
+        return try TripDecoder().decode(data: JSONSerialization.data(withJSONObject: object))
     }
 
     private func fixtureData(named name: String) throws -> Data {

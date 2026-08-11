@@ -11,6 +11,7 @@ struct TodayView: View {
             Group {
                 switch viewModel.state {
                 case .loading: ProgressView("正在读取行程")
+                case .preTrip(let trip, let daysUntilStart): PreTripView(trip: trip, daysUntilStart: daysUntilStart)
                 case .unavailable(let message): ContentUnavailableView("今天暂无行程", systemImage: "calendar.badge.exclamationmark", description: Text(message))
                 case .ready(let snapshot):
                     ScrollView { VStack(alignment: .leading, spacing: 20) {
@@ -27,11 +28,37 @@ struct TodayView: View {
                         TonightSection(stay: snapshot.tonightStay)
                         DailyMomentSection()
                     }.padding() }
+                case .postTrip(let trip): PostTripView(trip: trip)
                 }
             }
             .navigationTitle("青甘随行")
             .task { await viewModel.load(now: AppDateProvider().now()) }
         }
+    }
+}
+
+private struct PreTripView: View {
+    let trip: Trip
+    let daysUntilStart: Int
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text(trip.name).font(.largeTitle.bold())
+            Text("计划出发").font(.title2)
+            Text(trip.plannedStartDate.formatted(.dateTime.year().month().day())).font(.title3)
+            Text("还有 \(daysUntilStart) 天").foregroundStyle(.secondary)
+            Text("10 天自驾旅程").font(.headline)
+            if let day = trip.days.first { Text("Day 1\n\(day.origin.name) → \(day.destination.name)").font(.title3) }
+        }.padding()
+    }
+}
+
+private struct PostTripView: View {
+    let trip: Trip
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("\(trip.name) · 已完成").font(.largeTitle.bold())
+            Text("\(trip.durationDays) 天旅程完成").font(.title2)
+        }.padding()
     }
 }
 
@@ -94,13 +121,26 @@ private struct DailyMomentSection: View { var body: some View { EmptyView() } }
 private struct NavigationActions: View {
     let point: NavigationPoint
     private let service = MapURLNavigationService(canOpenURL: { UIApplication.shared.canOpenURL($0) })
-    var body: some View { Menu {
-        ForEach(service.availableProviders(for: point), id: \.rawValue) { provider in
-            if let url = try? service.navigationURL(for: point, provider: provider) { Link(provider.title, destination: url) }
+    var body: some View {
+        let providers = service.availableProviders(for: point)
+        if providers.contains(.amap), let url = try? service.navigationURL(for: point, provider: .amap) {
+            Link(destination: url) {
+                Label("开始导航", systemImage: "location.fill")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+            }
+            .buttonStyle(.borderedProminent)
+        } else {
+            VStack(alignment: .leading, spacing: 8) {
+                Label("需要安装高德地图才能开始导航", systemImage: "map")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                if providers.contains(.appleMaps), let url = try? service.navigationURL(for: point, provider: .appleMaps) {
+                    Link("使用系统地图备用", destination: url)
+                        .font(.footnote.weight(.semibold))
+                }
+            }
         }
-    } label: { Label("开始导航", systemImage: "location.fill").frame(maxWidth: .infinity).padding(.vertical, 12) }
-    .buttonStyle(.borderedProminent) }
+    }
 }
-
-private extension NavigationProvider { var title: String { switch self { case .appleMaps: "Apple 地图"; case .amap: "高德地图"; case .baiduMaps: "百度地图" } } }
 private extension View { func travelCard(highlighted: Bool = false) -> some View { padding().frame(maxWidth: .infinity, alignment: .leading).background(highlighted ? Color.orange.opacity(0.12) : Color(uiColor: .secondarySystemBackground)).clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous)) } }

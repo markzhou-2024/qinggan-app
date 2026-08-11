@@ -31,11 +31,12 @@ public struct MapURLNavigationService: NavigationService {
     }
 
     public func availableProviders(for point: NavigationPoint) -> [NavigationProvider] {
-        var providers: [NavigationProvider] = [.appleMaps]
-        if compatibleCoordinate(for: point, provider: .amap) != nil,
-           canOpenURL(URL(string: "iosamap://")!) {
+        var providers: [NavigationProvider] = []
+        if canOpenURL(URL(string: "iosamap://")!), (try? amapURL(for: point)) != nil {
             providers.append(.amap)
         }
+        // Apple Maps remains an optional system fallback, never the primary provider.
+        providers.append(.appleMaps)
         if canOpenURL(URL(string: "baidumap://")!) {
             providers.append(.baiduMaps)
         }
@@ -76,21 +77,37 @@ public struct MapURLNavigationService: NavigationService {
     }
 
     private func amapURL(for point: NavigationPoint) throws -> URL {
-        guard let coordinate = compatibleCoordinate(for: point, provider: .amap) else {
-            throw NavigationServiceError.incompatibleCoordinate(provider: .amap)
-        }
         var components = URLComponents()
         components.scheme = "iosamap"
-        components.host = "navi"
-        let coordinateAlreadyEncrypted = coordinate.system == .gcj02
-        components.queryItems = [
-            URLQueryItem(name: "sourceApplication", value: sourceApplication),
-            URLQueryItem(name: "poiname", value: point.name),
-            URLQueryItem(name: "lat", value: String(coordinate.latitude)),
-            URLQueryItem(name: "lon", value: String(coordinate.longitude)),
-            URLQueryItem(name: "dev", value: coordinateAlreadyEncrypted ? "0" : "1"),
-            URLQueryItem(name: "style", value: "0")
-        ]
+        if let coordinate = compatibleCoordinate(for: point, provider: .amap) {
+            components.host = "navi"
+            let coordinateAlreadyEncrypted = coordinate.system == .gcj02
+            var queryItems = [
+                URLQueryItem(name: "sourceApplication", value: sourceApplication),
+                URLQueryItem(name: "poiname", value: point.name),
+                URLQueryItem(name: "lat", value: String(coordinate.latitude)),
+                URLQueryItem(name: "lon", value: String(coordinate.longitude)),
+                URLQueryItem(name: "dev", value: coordinateAlreadyEncrypted ? "0" : "1")
+            ]
+            if let amapPoiId = point.amapPoiId {
+                queryItems.insert(URLQueryItem(name: "poiid", value: amapPoiId), at: 2)
+            }
+            components.queryItems = queryItems
+        } else if !pointHasCoordinates(point), let query = destinationText(for: point) {
+            // Coordinates pending: make the distinction explicit by using AMap POI search,
+            // never by inventing a coordinate or treating an unknown system as GCJ-02.
+            components.host = "poi"
+            var queryItems = [
+                URLQueryItem(name: "sourceApplication", value: sourceApplication),
+                URLQueryItem(name: "name", value: query)
+            ]
+            if let amapPoiId = point.amapPoiId {
+                queryItems.insert(URLQueryItem(name: "poiid", value: amapPoiId), at: 1)
+            }
+            components.queryItems = queryItems
+        } else {
+            throw NavigationServiceError.incompatibleCoordinate(provider: .amap)
+        }
         guard let url = components.url else { throw NavigationServiceError.invalidDestination }
         return url
     }
@@ -124,6 +141,10 @@ public struct MapURLNavigationService: NavigationService {
         case .baiduMaps:
             return coordinates.first
         }
+    }
+
+    private func pointHasCoordinates(_ point: NavigationPoint) -> Bool {
+        point.primaryCoordinate != nil || !point.alternateCoordinates.isEmpty
     }
 
     private func baiduCoordinateType(for system: CoordinateSystem) -> String {

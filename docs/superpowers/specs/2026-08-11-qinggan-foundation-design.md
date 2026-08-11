@@ -112,7 +112,7 @@ Enums are stored as readable strings. Priority uses only `S_PLUS`, `S`, `A_PLUS`
 
 Flyway owns schema and deterministic seed data. A versioned migration inserts:
 
-- one ACTIVE trip with code `QINGGAN-2026`, dates 2026-08-13 through 2026-08-22, duration 10, and initial revision 1;
+- one planning trip with code `QINGGAN-2026`, a planned start date seed of 2026-08-13, duration 10, and initial revision 1; runtime start dates are sliding configuration, not canonical itinerary facts;
 - exactly ten TripDay rows numbered 1 through 10 and no Day11;
 - all route places, overnight places, scenic locations, transfer nodes, and route stops;
 - optional/recommended NavigationPoint examples where navigation guidance is useful, while allowing coordinate values to be null;
@@ -249,4 +249,4 @@ Local defaults are development-only and documented. Secrets are configurable thr
 
 Implementation occurs on `codex/qinggan-v1-001a`. Completion may be reported only after backend tests, frontend tests, both production builds, Compose startup, real MySQL/Redis health, Flyway migration, HTTP smoke tests, and a clean Git status all succeed. The final implementation is committed only after verification evidence is captured.
 
-If Docker is unavailable or any required verification cannot run successfully, the result is reported as `ACTIVE / PARTIAL`, never completed.
+For Native Foundation acceptance, Simulator + real MySQL/API + offline runtime are sufficient; Docker Registry or Compose image-resolution timeouts are non-blocking environment notes.

@@ -64,6 +64,24 @@ public enum VerificationStatus: String, CaseIterable, NormalizedStringCodable, S
     case pending
 }
 
+public enum TripLifecycleStatus: String, NormalizedStringCodable, CaseIterable, Sendable {
+    case planning
+    case started
+    case completed
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let raw = try container.decode(String.self).lowercased()
+        switch raw {
+        case "planning", "planned", "active": self = .planning
+        case "started": self = .started
+        case "completed": self = .completed
+        default:
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Unsupported trip lifecycle status: \(raw)")
+        }
+    }
+}
+
 public enum NavigationPointType: String, CaseIterable, NormalizedStringCodable, Sendable {
     case recommended
     case avoid
@@ -109,6 +127,8 @@ public struct Place: Identifiable, Codable, Equatable, Sendable {
 public struct NavigationPoint: Identifiable, Codable, Equatable, Sendable {
     public let id: String
     public let name: String
+    /// Verified AMap POI identifier when available; never inferred from a name.
+    public let amapPoiId: String?
     public let address: String?
     public let type: NavigationPointType
     public let note: String?
@@ -122,6 +142,7 @@ public struct NavigationPoint: Identifiable, Codable, Equatable, Sendable {
     public init(
         id: String,
         name: String,
+        amapPoiId: String? = nil,
         address: String?,
         type: NavigationPointType,
         note: String?,
@@ -133,6 +154,7 @@ public struct NavigationPoint: Identifiable, Codable, Equatable, Sendable {
     ) {
         self.id = id
         self.name = name
+        self.amapPoiId = amapPoiId
         self.address = address
         self.type = type
         self.note = note
@@ -237,6 +259,43 @@ public struct TripDay: Identifiable, Codable, Equatable, Sendable {
     public let stops: [TripStop]
     public let stay: Stay?
 
+    public init(
+        id: String,
+        number: Int,
+        date: Date,
+        title: String,
+        type: DayType,
+        plannedDistanceKm: Int?,
+        plannedDistance: String?,
+        plannedDrivingMinutes: Int?,
+        plannedDrivingDuration: String?,
+        origin: Place,
+        destination: Place,
+        stops: [TripStop],
+        stay: Stay?
+    ) {
+        self.id = id
+        self.number = number
+        self.date = date
+        self.title = title
+        self.type = type
+        self.plannedDistanceKm = plannedDistanceKm
+        self.plannedDistance = plannedDistance
+        self.plannedDrivingMinutes = plannedDrivingMinutes
+        self.plannedDrivingDuration = plannedDrivingDuration
+        self.origin = origin
+        self.destination = destination
+        self.stops = stops
+        self.stay = stay
+    }
+
+    public func dated(_ date: Date) -> TripDay {
+        TripDay(id: id, number: number, date: date, title: title, type: type,
+                plannedDistanceKm: plannedDistanceKm, plannedDistance: plannedDistance,
+                plannedDrivingMinutes: plannedDrivingMinutes, plannedDrivingDuration: plannedDrivingDuration,
+                origin: origin, destination: destination, stops: stops, stay: stay)
+    }
+
     private enum CodingKeys: String, CodingKey {
         case id, number, date, title, type, plannedDistanceKm, plannedDistance, plannedDrivingMinutes, plannedDrivingDuration, origin, destination, stops, stay
     }
@@ -286,13 +345,17 @@ public struct Trip: Identifiable, Codable, Equatable, Sendable {
     public let name: String
     public let startDate: Date
     public let endDate: Date
+    public let actualStartDate: Date?
+    public let status: TripLifecycleStatus
+    public let timeZoneIdentifier: String
     public let durationDays: Int
     public let revision: Int
     public let updatedAt: Date
     public let days: [TripDay]
 
     private enum CodingKeys: String, CodingKey {
-        case schemaVersion, tripId, tripName, startDate, endDate, durationDays, revision, updatedAt, days
+        case schemaVersion, tripId, tripName, startDate, endDate, plannedStartDate, actualStartDate
+        case durationDays, status, timeZone, revision, updatedAt, days
     }
 
     public init(from decoder: Decoder) throws {
@@ -300,14 +363,29 @@ public struct Trip: Identifiable, Codable, Equatable, Sendable {
         schemaVersion = try container.decode(String.self, forKey: .schemaVersion)
         id = try container.decode(String.self, forKey: .tripId)
         name = try container.decode(String.self, forKey: .tripName)
-        let start = try container.decode(String.self, forKey: .startDate)
-        let end = try container.decode(String.self, forKey: .endDate)
-        guard let parsedStart = TripDateCodec.day.date(from: start), let parsedEnd = TripDateCodec.day.date(from: end) else {
+        let start = try container.decodeIfPresent(String.self, forKey: .plannedStartDate)
+            ?? container.decode(String.self, forKey: .startDate)
+        let parsedDuration = try container.decode(Int.self, forKey: .durationDays)
+        let end = try container.decodeIfPresent(String.self, forKey: .endDate)
+        guard let parsedStart = TripDateCodec.day.date(from: start) else {
             throw DecodingError.dataCorruptedError(forKey: .startDate, in: container, debugDescription: "Invalid trip date")
         }
         startDate = parsedStart
-        endDate = parsedEnd
-        durationDays = try container.decode(Int.self, forKey: .durationDays)
+        if let end, let parsedEnd = TripDateCodec.day.date(from: end) {
+            endDate = parsedEnd
+        } else {
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.timeZone = TimeZone(identifier: "Asia/Shanghai")!
+            endDate = calendar.date(byAdding: .day, value: parsedDuration - 1, to: parsedStart)!
+        }
+        durationDays = parsedDuration
+        if let actual = try container.decodeIfPresent(String.self, forKey: .actualStartDate) {
+            actualStartDate = TripDateCodec.day.date(from: actual)
+        } else {
+            actualStartDate = nil
+        }
+        status = try container.decodeIfPresent(TripLifecycleStatus.self, forKey: .status) ?? .planning
+        timeZoneIdentifier = try container.decodeIfPresent(String.self, forKey: .timeZone) ?? "Asia/Shanghai"
         revision = try container.decode(Int.self, forKey: .revision)
         let updated = try container.decode(String.self, forKey: .updatedAt)
         guard let parsedUpdated = TripDateCodec.timestampDate(from: updated) else {
@@ -317,6 +395,10 @@ public struct Trip: Identifiable, Codable, Equatable, Sendable {
         days = try container.decode([TripDay].self, forKey: .days)
     }
 
+    public var plannedStartDate: Date { startDate }
+
+    public var effectiveStartDate: Date { actualStartDate ?? plannedStartDate }
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(schemaVersion, forKey: .schemaVersion)
@@ -324,7 +406,11 @@ public struct Trip: Identifiable, Codable, Equatable, Sendable {
         try container.encode(name, forKey: .tripName)
         try container.encode(TripDateCodec.day.string(from: startDate), forKey: .startDate)
         try container.encode(TripDateCodec.day.string(from: endDate), forKey: .endDate)
+        try container.encode(TripDateCodec.day.string(from: plannedStartDate), forKey: .plannedStartDate)
+        try container.encodeIfPresent(actualStartDate.map(TripDateCodec.day.string(from:)), forKey: .actualStartDate)
         try container.encode(durationDays, forKey: .durationDays)
+        try container.encode(status, forKey: .status)
+        try container.encode(timeZoneIdentifier, forKey: .timeZone)
         try container.encode(revision, forKey: .revision)
         try container.encode(TripDateCodec.timestampString(from: updatedAt), forKey: .updatedAt)
         try container.encode(days, forKey: .days)

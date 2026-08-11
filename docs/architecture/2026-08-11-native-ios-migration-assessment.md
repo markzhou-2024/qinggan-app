@@ -45,7 +45,7 @@ The previous task’s desired endpoints are documented but do not exist at runti
 
 ### Toolchain state
 
-The machine initially had no Java/Maven/Node/Docker on PATH. Temporary JDK 17 and Maven were used outside the repository to run the two backend tests. Docker/Docker Desktop/Colima is not installed, so Testcontainers and Compose verification are blocked. Full Xcode, Simulator, `xcodebuild`, and `simctl` are also absent; only Command Line Tools are selected.
+Historical assessment note: the original environment lacked Java/Maven/Docker/Xcode. The current environment has these installed; any remaining Docker Registry image-resolution timeout is non-blocking for Native Foundation acceptance.
 
 ## 2. Migration Mapping
 
@@ -164,8 +164,10 @@ CoreLocation remains local-only. No location samples, tracks, or member position
 struct Trip: Sendable, Equatable {
     let code: String
     let name: String
-    let startDate: Date
-    let endDate: Date
+    let plannedStartDate: Date
+    let actualStartDate: Date?
+    let status: TripLifecycleStatus
+    let timeZone: String
     let durationDays: Int
     let revision: Int
 }
@@ -173,7 +175,7 @@ struct Trip: Sendable, Equatable {
 struct TripDay: Identifiable, Sendable, Equatable {
     let id: Int
     let number: Int
-    let date: Date
+    let resolvedDate: Date
     let title: String
     let route: [TripStop]
     let stay: Stay?
@@ -224,7 +226,7 @@ The first implementation must be a narrow, real path:
 4. Resolve the next actionable stop from Progress and its ordered route.
 5. Render Today with day/date/route/next stop/recommended navigation point/tonight card.
 6. Build available navigation choices from installed-provider capability checks.
-7. Open Apple Maps by default; offer installed Amap and Baidu choices without leaving the user to manually copy an address.
+7. Open AMap by default using verified GCJ-02/POI data; retain Apple Maps only as an optional fallback.
 8. If the network fails, load the last cached itinerary and visibly label it `当前使用离线行程数据`; show cache timestamp and any stale-weather timestamp separately.
 
 Location and weather are deliberately not dependencies of this acceptance path. If location permission is denied, the screen still works; only live distance/city embellishments are absent.
@@ -240,8 +242,8 @@ Location and weather are deliberately not dependencies of this acceptance path. 
 - Tonight stay selection from the current day.
 - Wire DTO decoding against a literal full itinerary fixture.
 - Remote-success writes cache; remote-failure reads valid cache; remote-failure with empty cache produces a visible failure.
-- Apple Maps URL creation with WGS84 coordinates and keyword fallback.
-- Amap/Baidu provider URLs only when their corresponding application availability probe succeeds; unavailable providers are omitted.
+- AMap URI creation with GCJ-02 `dev=0`, WGS84 `dev=1`, optional POI ID, and explicit POI-search fallback.
+- AMap availability is the primary capability check; Apple Maps/Baidu remain optional fallbacks.
 - Notification permission abstraction and local-notification request construction.
 
 ### Integration/UI tests
@@ -254,13 +256,13 @@ Location and weather are deliberately not dependencies of this acceptance path. 
 ### Required environments
 
 - `xcodebuild test` against an iPhone simulator for all unit and UI tests.
-- Manual real-device check for Apple Maps launch, installed/uninstalled third-party map fallback, local notification permission, and cache after Airplane Mode.
+- Simulator verification is sufficient for this foundation; real-device map launch is deferred to pre-trip installation.
 
 ## 8. Risks and Decisions Needed Before Coding
 
-1. **Xcode is not installed.** Native compilation, simulator verification, signing, archives, and device checks cannot currently run. Install full Xcode and an iPhone simulator before beginning the implementation phase.
+1. **Native runtime evidence is environment-dependent.** Full Xcode and iOS 26.5 are now installed and Simulator verification is available; physical-device signing/install remains a later distribution check.
 2. **No backend API or seed exists.** The required real-data vertical slice cannot be built until the backend foundation continues through Flyway seed and the itinerary read endpoint. This is the primary sequencing dependency.
-3. **Docker is absent.** MySQL/Testcontainers/Compose verification is still blocked. Docker Desktop must be installed and running for the server foundation’s required verification.
+3. **Compose image resolution.** Docker Desktop is available and real MySQL/Testcontainers verification passes; a Registry timeout may still block rebuilding the Compose backend image.
 4. **Navigation coordinate ambiguity.** The API must expose coordinate reference systems explicitly. Apple and Chinese map URLs must not share an unlabeled coordinate pair.
 5. **Map URL scheme verification.** Provider schemes and capability checks need validation on target iOS versions and real devices during implementation; the abstraction should keep provider URL formats replaceable.
 6. **Family Trip access.** A fixed public trip identifier is appropriate only for read-only private distribution. If server writes are enabled, use a server-issued non-secret-in-source device token delivered through environment/configuration, never a Git-committed secret.
@@ -281,7 +283,7 @@ Approve this architecture only if the following sequencing is accepted:
 Complete shared backend data contract
   → Install/verify Docker and Xcode
   → Build/test native core and Today vertical slice
-  → Verify Apple Maps + cache on simulator/device
+  → Verify AMap URI contract + cache on Simulator; defer real AMap invocation to device installation
   → Add Trip, Map, Memories shells after the real navigation path works
 ```
 

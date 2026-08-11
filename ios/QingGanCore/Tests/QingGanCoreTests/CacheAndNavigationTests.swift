@@ -77,7 +77,49 @@ final class CacheAndNavigationTests: XCTestCase {
         let point = navigationPoint(primary: GeoCoordinate(latitude: 37.1234, longitude: 97.5678, system: .gcj02))
         let service = MapURLNavigationService(canOpenURL: { $0.scheme == "iosamap" })
 
-        XCTAssertEqual(service.availableProviders(for: point), [.appleMaps, .amap])
+        XCTAssertEqual(service.availableProviders(for: point), [.amap, .appleMaps])
+    }
+
+    func testAMapUsesGCJ02DevZeroAndVerifiedPoiID() throws {
+        let point = navigationPoint(
+            primary: GeoCoordinate(latitude: 37.1234, longitude: 97.5678, system: .gcj02),
+            amapPoiId: "B0FFI206UL"
+        )
+        let service = MapURLNavigationService(canOpenURL: { _ in true })
+
+        let url = try service.navigationURL(for: point, provider: .amap)
+        let query = try XCTUnwrap(URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems)
+        let values = Dictionary(uniqueKeysWithValues: query.map { ($0.name, $0.value ?? "") })
+
+        XCTAssertEqual(url.scheme, "iosamap")
+        XCTAssertEqual(url.host, "navi")
+        XCTAssertEqual(values["dev"], "0")
+        XCTAssertEqual(values["lat"], "37.1234")
+        XCTAssertEqual(values["lon"], "97.5678")
+        XCTAssertEqual(values["poiid"], "B0FFI206UL")
+        XCTAssertEqual(values["poiname"], "翡翠湖景区停车场")
+    }
+
+    func testAMapUsesWGS84DevOne() throws {
+        let point = navigationPoint(primary: GeoCoordinate(latitude: 37.1234, longitude: 97.5678, system: .wgs84))
+        let service = MapURLNavigationService(canOpenURL: { _ in true })
+
+        let url = try service.navigationURL(for: point, provider: .amap)
+        let values = try XCTUnwrap(URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems)
+            .reduce(into: [:]) { $0[$1.name] = $1.value }
+
+        XCTAssertEqual(values["dev"], "1")
+    }
+
+    func testAMapFallsBackToPOISearchWhenCoordinateIsPending() throws {
+        let point = navigationPoint(primary: nil, amapPoiId: "B0FFI206UL")
+        let service = MapURLNavigationService(canOpenURL: { _ in true })
+
+        let url = try service.navigationURL(for: point, provider: .amap)
+
+        XCTAssertEqual(url.host, "poi")
+        XCTAssertTrue(url.absoluteString.contains("poiid=B0FFI206UL"))
+        XCTAssertTrue(url.absoluteString.removingPercentEncoding?.contains("翡翠湖景区停车场") == true)
     }
 
     func testAMapRejectsBD09CoordinatesThatHaveNoDeclaredCompatibility() {
@@ -104,10 +146,11 @@ final class CacheAndNavigationTests: XCTestCase {
         return try Data(contentsOf: url)
     }
 
-    private func navigationPoint(primary: GeoCoordinate?) -> NavigationPoint {
+    private func navigationPoint(primary: GeoCoordinate?, amapPoiId: String? = nil) -> NavigationPoint {
         NavigationPoint(
             id: "emerald-parking",
             name: "翡翠湖景区停车场",
+            amapPoiId: amapPoiId,
             address: "大柴旦翡翠湖",
             type: .parking,
             note: nil,
