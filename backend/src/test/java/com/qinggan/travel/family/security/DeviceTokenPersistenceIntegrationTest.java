@@ -2,9 +2,9 @@ package com.qinggan.travel.family.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.qinggan.travel.family.api.dto.BindDeviceRequest;
+import com.qinggan.travel.family.api.dto.DeviceBindingResponse;
 import com.qinggan.travel.family.application.FamilyBindingService;
-import com.qinggan.travel.family.application.FamilyBindingService.BindingCommand;
-import com.qinggan.travel.family.application.FamilyBindingService.BindingResult;
 import com.qinggan.travel.family.domain.TripDevice;
 import com.qinggan.travel.family.persistence.FamilyTripJpaRepository;
 import com.qinggan.travel.family.persistence.TripDeviceJpaRepository;
@@ -34,13 +34,13 @@ class DeviceTokenPersistenceIntegrationTest {
 
     @Test
     void persistsOnlyTheSha256HashOfTheIssuedDeviceToken() {
-        BindingResult result = service.bind(
+        DeviceBindingResponse result = service.bind(
             "qinggan-2026-family",
-            "test-family-join-token",
-            new BindingCommand(
+            "Bearer test-family-join-token",
+            new BindDeviceRequest(
                 "88888888-8888-8888-8888-888888888888",
-                "GRANDMOTHER",
                 "device-security-test",
+                "GRANDMOTHER",
                 "奶奶的 iPhone"));
 
         Trip trip = tripRepository.findByCode("qinggan-2026-family").orElseThrow();
