@@ -1,0 +1,67 @@
+name: QingGan iOS CI
+
+on:
+  push:
+    branches:
+      - codex/qinggan-v1-task0-runtime-gate
+  pull_request:
+    paths:
+      - 'ios/**'
+      - 'QingGanApp.xcodeproj/**'
+      - '.github/workflows/ios-core-ci.yml'
+
+concurrency:
+  group: qinggan-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios-tests:
+    runs-on: macos-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Swift version
+        run: swift --version
+
+      - name: Run QingGanCore tests
+        run: swift test --package-path ios/QingGanCore
+
+      - name: Select available iPhone simulator
+        id: simulator
+        shell: bash
+        run: |
+          DEVICE_ID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; data=json.load(sys.stdin); ids=[d["udid"] for devices in data.get("devices",{}).values() for d in devices if d.get("isAvailable") and d.get("name","").startswith("iPhone")]; print(ids[0] if ids else "")')
+          if [ -z "$DEVICE_ID" ]; then
+            echo "No available iPhone simulator found" >&2
+            xcrun simctl list devices available
+            exit 1
+          fi
+          echo "device_id=$DEVICE_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Run QingGanApp runtime configuration tests
+        run: |
+          xcodebuild test \
+            -project QingGanApp.xcodeproj \
+            -scheme QingGanApp \
+            -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.device_id }}' \
+            -derivedDataPath /tmp/qinggan-ci \
+            -only-testing:QingGanAppTests/AppRuntimeConfigurationTests
+
+      - name: Build Release for simulator
+        run: |
+          xcodebuild build \
+            -project QingGanApp.xcodeproj \
+            -scheme QingGanApp \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.device_id }}' \
+            -derivedDataPath /tmp/qinggan-release-ci \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Verify Release production endpoint
+        run: |
+          PLIST=/tmp/qinggan-release-ci/Build/Products/Release-iphonesimulator/QingGanApp.app/Info.plist
+          test "$(/usr/libexec/PlistBuddy -c 'Print :QINGGAN_API_BASE_URL' "$PLIST")" = "https://qinggan.findagent.tech"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :QINGGAN_TRIP_ID' "$PLIST")" = "qinggan-2026-family"
