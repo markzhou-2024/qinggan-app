@@ -35,7 +35,7 @@ public class TripDevice {
     @Column(nullable = false, length = 16)
     private DeviceStatus status;
 
-    @Column(name = "device_token_hash", nullable = false, length = 64)
+    @Column(name = "device_token_hash", nullable = false, columnDefinition = "CHAR(64)")
     private String deviceTokenHash;
 
     @Column(name = "binding_version", nullable = false)
