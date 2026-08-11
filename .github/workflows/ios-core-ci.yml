@@ -61,3 +61,9 @@ jobs:
             -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.device_id }}' \
             -derivedDataPath /tmp/qinggan-release-ci \
             CODE_SIGNING_ALLOWED=NO
+
+      - name: Verify Release production endpoint
+        run: |
+          PLIST=/tmp/qinggan-release-ci/Build/Products/Release-iphonesimulator/QingGanApp.app/Info.plist
+          test "$(/usr/libexec/PlistBuddy -c 'Print :QINGGAN_API_BASE_URL' "$PLIST")" = "https://qinggan.findagent.tech"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :QINGGAN_TRIP_ID' "$PLIST")" = "qinggan-2026-family"
