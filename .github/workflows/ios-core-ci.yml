@@ -10,6 +10,10 @@ on:
       - 'QingGanApp.xcodeproj/**'
       - '.github/workflows/ios-core-ci.yml'
 
+concurrency:
+  group: qinggan-ios-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ios-tests:
     runs-on: macos-latest
@@ -42,5 +46,15 @@ jobs:
             -project QingGanApp.xcodeproj \
             -scheme QingGanApp \
             -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.device_id }}' \
-            -derivedDataPath /tmp/qinggan-ci \
+            -derivedDataPath /tmp/qinggan-ci
+
+      - name: Build Release for simulator
+        run: |
+          xcodebuild build \
+            -project QingGanApp.xcodeproj \
+            -scheme QingGanApp \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.device_id }}' \
+            -derivedDataPath /tmp/qinggan-release-ci \
             CODE_SIGNING_ALLOWED=NO
