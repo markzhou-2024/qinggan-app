@@ -28,7 +28,7 @@ public class TripDay {
     @Column(name = "day_number", nullable = false)
     private int dayNumber;
 
-    @Column(nullable = false)
+    @Column
     private LocalDate date;
 
     @Column(nullable = false, length = 255)
@@ -73,4 +73,3 @@ public class TripDay {
     public Place getOvernightPlace() { return overnightPlace; }
     public int getSequence() { return sequence; }
 }
-

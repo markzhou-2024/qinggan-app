@@ -10,7 +10,11 @@ public record ItineraryResponse(
     String tripName,
     LocalDate startDate,
     LocalDate endDate,
+    LocalDate plannedStartDate,
+    LocalDate actualStartDate,
     int durationDays,
+    String status,
+    String timeZone,
     long revision,
     Instant updatedAt,
     List<DayResponse> days

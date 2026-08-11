@@ -7,6 +7,7 @@ import java.util.List;
 public record NavigationPointResponse(
     String id,
     String name,
+    String amapPoiId,
     String address,
     String type,
     String note,

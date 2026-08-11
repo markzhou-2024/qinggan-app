@@ -23,8 +23,12 @@ class ItineraryApiIntegrationTest {
     void returnsOneNativeReadyItineraryDocument() throws Exception {
         mockMvc.perform(get("/api/v1/trips/qinggan-2026-family/itinerary"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.schemaVersion").value("1.0"))
+            .andExpect(jsonPath("$.schemaVersion").value("1.1"))
             .andExpect(jsonPath("$.tripId").value("qinggan-2026-family"))
+            .andExpect(jsonPath("$.plannedStartDate").value("2026-08-13"))
+            .andExpect(jsonPath("$.actualStartDate").doesNotExist())
+            .andExpect(jsonPath("$.status").value("PLANNING"))
+            .andExpect(jsonPath("$.timeZone").value("Asia/Shanghai"))
             .andExpect(jsonPath("$.revision").value(1))
             .andExpect(jsonPath("$.days.length()").value(10))
             .andExpect(jsonPath("$.days[4].number").value(5))

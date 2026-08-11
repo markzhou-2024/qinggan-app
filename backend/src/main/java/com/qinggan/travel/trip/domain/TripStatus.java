@@ -2,8 +2,9 @@ package com.qinggan.travel.trip.domain;
 
 public enum TripStatus {
     PLANNED,
-    ACTIVE,
+    PLANNING,
+    STARTED,
     COMPLETED,
+    ACTIVE,
     CANCELLED
 }
-

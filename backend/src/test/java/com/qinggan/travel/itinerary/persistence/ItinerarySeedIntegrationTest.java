@@ -25,17 +25,22 @@ class ItinerarySeedIntegrationTest {
         assertThat(tripCount).isEqualTo(1);
 
         List<Object[]> trip = jdbcTemplate.query(
-            "select start_date, end_date, duration_days from trip where code = 'qinggan-2026-family'",
+            "select start_date, end_date, duration_days, status, time_zone from trip where code = 'qinggan-2026-family'",
             (resultSet, rowNum) -> new Object[] {
-                resultSet.getDate("start_date"), resultSet.getDate("end_date"), resultSet.getInt("duration_days")
+                resultSet.getDate("start_date"), resultSet.getDate("end_date"), resultSet.getInt("duration_days"),
+                resultSet.getString("status"), resultSet.getString("time_zone")
             });
         assertThat(trip).containsExactly(new Object[] {
-            Date.valueOf(LocalDate.of(2026, 8, 13)), Date.valueOf(LocalDate.of(2026, 8, 22)), 10
+            Date.valueOf(LocalDate.of(2026, 8, 13)), Date.valueOf(LocalDate.of(2026, 8, 22)), 10, "PLANNING", "Asia/Shanghai"
         });
 
         List<Integer> dayNumbers = jdbcTemplate.queryForList(
             "select day_number from trip_day order by sequence", Integer.class);
         assertThat(dayNumbers).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+
+        Integer persistedTripDayDates = jdbcTemplate.queryForObject(
+            "select count(*) from trip_day where date is not null", Integer.class);
+        assertThat(persistedTripDayDates).isZero();
 
         List<String> dayFiveRoute = jdbcTemplate.queryForList("""
             select p.name

@@ -33,6 +33,9 @@ public class NavigationPoint {
     @Column(length = 255)
     private String address;
 
+    @Column(name = "amap_poi_id", length = 128)
+    private String amapPoiId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "navigation_type", nullable = false, length = 32)
     private NavigationType navigationType;
@@ -60,6 +63,7 @@ public class NavigationPoint {
     public Place getPlace() { return place; }
     public String getName() { return name; }
     public String getAddress() { return address; }
+    public String getAmapPoiId() { return amapPoiId; }
     public NavigationType getNavigationType() { return navigationType; }
     public String getNavigationKeyword() { return navigationKeyword; }
     public boolean isRecommended() { return recommended; }

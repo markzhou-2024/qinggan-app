@@ -35,6 +35,12 @@ public class Trip {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
+    @Column(name = "actual_start_date")
+    private LocalDate actualStartDate;
+
+    @Column(name = "time_zone", nullable = false, length = 64)
+    private String timeZone;
+
     @Column(name = "duration_days", nullable = false)
     private int durationDays;
 
@@ -62,6 +68,7 @@ public class Trip {
         this.endDate = Objects.requireNonNull(endDate);
         this.durationDays = durationDays;
         this.status = Objects.requireNonNull(status);
+        this.timeZone = "Asia/Shanghai";
         this.revision = 1;
         validateInclusiveDuration();
     }
@@ -97,6 +104,8 @@ public class Trip {
     public String getName() { return name; }
     public LocalDate getStartDate() { return startDate; }
     public LocalDate getEndDate() { return endDate; }
+    public LocalDate getActualStartDate() { return actualStartDate; }
+    public String getTimeZone() { return timeZone; }
     public int getDurationDays() { return durationDays; }
     public TripStatus getStatus() { return status; }
     public long getRevision() { return revision; }

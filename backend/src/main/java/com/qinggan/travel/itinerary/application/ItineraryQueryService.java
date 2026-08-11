@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDate;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -63,19 +64,23 @@ public class ItineraryQueryService {
         Map<Long, Stay> staysByDay = stayRepository.findByTripDayIdIn(dayIds).stream()
             .collect(Collectors.toMap(stay -> stay.getTripDay().getId(), Function.identity()));
 
+        LocalDate effectiveStartDate = trip.getActualStartDate() != null ? trip.getActualStartDate() : trip.getStartDate();
         List<DayResponse> dayResponses = days.stream().map(day -> mapDay(
-            day, stopsByDay.getOrDefault(day.getId(), List.of()), pointsByPlace, staysByDay.get(day.getId()))).toList();
-        return new ItineraryResponse("1.0", trip.getCode(), trip.getName(), trip.getStartDate(), trip.getEndDate(),
-            trip.getDurationDays(), trip.getRevision(), trip.getUpdatedAt(), dayResponses);
+            day, effectiveStartDate.plusDays(day.getDayNumber() - 1), stopsByDay.getOrDefault(day.getId(), List.of()),
+            pointsByPlace, staysByDay.get(day.getId()))).toList();
+        LocalDate effectiveEndDate = effectiveStartDate.plusDays(trip.getDurationDays() - 1L);
+        return new ItineraryResponse("1.1", trip.getCode(), trip.getName(), effectiveStartDate, effectiveEndDate,
+            trip.getStartDate(), trip.getActualStartDate(), trip.getDurationDays(), trip.getStatus().name(),
+            trip.getTimeZone(), trip.getRevision(), trip.getUpdatedAt(), dayResponses);
     }
 
-    private DayResponse mapDay(TripDay day, List<TripStop> stops,
+    private DayResponse mapDay(TripDay day, LocalDate resolvedDate, List<TripStop> stops,
                                Map<Long, List<NavigationPoint>> pointsByPlace, Stay stay) {
         List<StopResponse> mappedStops = stops.stream().map(stop -> mapStop(stop,
             pointsByPlace.getOrDefault(stop.getPlace().getId(), List.of()))).toList();
         PlaceResponse origin = stops.stream().filter(stop -> stop.getStopType() == StopType.ORIGIN)
             .findFirst().map(TripStop::getPlace).map(this::mapPlace).orElse(null);
-        return new DayResponse(String.valueOf(day.getId()), day.getDayNumber(), day.getDate(), day.getTitle(),
+        return new DayResponse(String.valueOf(day.getId()), day.getDayNumber(), resolvedDate, day.getTitle(),
             day.getDayType().name(), day.getPlannedDistanceKm(), day.getPlannedDistanceDisplay(),
             day.getPlannedDriveMinutes(), day.getPlannedDriveDisplay(), origin, mapPlace(day.getOvernightPlace()),
             mappedStops, mapStay(stay));
@@ -102,7 +107,7 @@ public class ItineraryQueryService {
             .findFirst().map(coordinate -> new GeoCoordinateResponse(coordinate.getLatitude().doubleValue(),
                 coordinate.getLongitude().doubleValue(), coordinate.getCoordinateSystem().name().toLowerCase())).orElse(null);
         List<GeoCoordinateResponse> alternatives = coordinates.stream().filter(coordinate -> !coordinate.equals(primary)).toList();
-        return new NavigationPointResponse(String.valueOf(point.getId()), point.getName(), point.getAddress(),
+        return new NavigationPointResponse(String.valueOf(point.getId()), point.getName(), point.getAmapPoiId(), point.getAddress(),
             point.getNavigationType().name(), point.getWarningText(), point.getNavigationKeyword(), point.isRecommended(),
             point.getVerificationStatus().name(), primary, alternatives);
     }
