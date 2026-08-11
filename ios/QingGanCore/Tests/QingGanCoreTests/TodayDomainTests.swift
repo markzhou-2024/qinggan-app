@@ -127,6 +127,13 @@ final class TodayDomainTests: XCTestCase {
         XCTAssertEqual(ResolveTonightStayUseCase().execute(day: day)?.hotelName, "大柴旦镇住宿（待确认）")
     }
 
+    func testFixedDateProviderIsExplicitAndSystemProviderIsSeparate() throws {
+        let fixedDate = try date("2026-08-16")
+
+        XCTAssertEqual(FixedDateProvider(date: fixedDate).now(), fixedDate)
+        XCTAssertNotEqual(SystemDateProvider().now(), fixedDate)
+    }
+
     private func decodedFixture(plannedStartDate: String? = nil, actualStartDate: String? = nil) throws -> Trip {
         var object = try JSONSerialization.jsonObject(with: fixtureData(named: "qinggan-itinerary")) as! [String: Any]
         if let plannedStartDate {

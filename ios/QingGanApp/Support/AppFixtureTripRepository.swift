@@ -24,12 +24,16 @@ enum AppFixtureError: LocalizedError {
 }
 
 struct AppDateProvider {
-    func now() -> Date {
-        let arguments = ProcessInfo.processInfo.arguments
+    private let provider: any DateProvider
+
+    init(arguments: [String] = ProcessInfo.processInfo.arguments) {
         if let index = arguments.firstIndex(of: "-QingGanToday"), arguments.indices.contains(index + 1),
            let date = TripDateCodec.day.date(from: arguments[index + 1]) {
-            return date
+            provider = FixedDateProvider(date: date)
+        } else {
+            provider = SystemDateProvider()
         }
-        return Date()
     }
+
+    func now() -> Date { provider.now() }
 }
