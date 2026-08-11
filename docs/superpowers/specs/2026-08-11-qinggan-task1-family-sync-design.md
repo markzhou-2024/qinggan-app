@@ -61,12 +61,12 @@ V1 的六个身份拥有相同旅途执行权限，角色的意义是“身份�
 V1 固定支持六个家庭身份：
 
 ```text
-FATHER       爸爸
-MOTHER       妈妈
-OLDER_SISTER 姐姐
+FATHER          爸爸
+MOTHER          妈妈
+OLDER_SISTER    姐姐
 YOUNGER_BROTHER 弟弟
-GRANDFATHER  爷爷
-GRANDMOTHER  奶奶
+GRANDFATHER     爷爷
+GRANDMOTHER     奶奶
 ```
 
 如果产品中文最终希望将“姐姐 / 弟弟”调整成更通用称呼，只修改服务端 displayName / UI 文案；稳定的 role code 不随展示文案变化。
@@ -121,7 +121,7 @@ V1 不建立 FamilyMember 用户账号，不要求用户名密码。
 - 首次绑定角色与设备；
 - 用户明确确认后的换机接管。
 
-它是家庭行程的“加入密钥”。
+它是家庭行程的“加入密钥”。**持有该 Token 等价于拥有加入和换机接管权限，因此必须按敏感凭据保护。**
 
 #### Device Token
 
@@ -336,9 +336,7 @@ device binding status
 
 并校验请求路径 tripId 与 token scope 一致。
 
-客户端 mutation body 中仍可带 deviceId 作为审计字段，但服务端的 actor 身份必须来自验证后的 Device Token，不信任客户端自己声明的 role。
-
-换句话说：
+客户端 mutation body 不需要提交 role；即使未来为了诊断携带 deviceId，服务端 actor 身份也必须来自验证后的 Device Token，不信任客户端自己声明的身份字段。
 
 ```text
 updatedByRole
@@ -673,10 +671,10 @@ planned
 
 - 不重复改变状态；
 - 不重复增加 revision；
-- 绑定 / 换机不重复签发多个有效设备会话；
-- 返回第一次已应用后的业务结果或等价当前结果。
+- 绑定 / 换机不重复产生多个 ACTIVE 设备会话；
+- 对需要返回新 Device Token 的 bind / takeover，服务端必须保证安全的幂等重试语义：同一 requestId 的网络重试能够恢复第一次绑定结果，而不是签发第二个活跃会话。
 
-这用于解决 iPhone 超时后“不知道服务器到底成功没有”的重试问题。
+实现计划必须明确这一点的安全实现方式，不能通过在普通日志或明文数据库列中长期保存 Device Token 来实现。
 
 ---
 
@@ -831,9 +829,9 @@ Family Join Token：
 
 Device Token：
 
-- 只通过 HTTPS response 返回一次明文；
+- 只通过 HTTPS response 暴露给成功绑定的客户端；
 - iOS 写 Keychain；
-- 服务端仅保存 hash；
+- 服务端长期持久化只保存不可逆 hash；
 - REVOKED 后立即无效。
 
 真正给家人手机的“扫码加入 / 分享家庭行程 Token”在后续 App Shell 设计中提供正式用户入口，不在 Task 1 使用隐藏 debug UI 代替。
@@ -884,11 +882,12 @@ Device Token：
 - family bind / takeover / execution 写接口仅允许 HTTPS；
 - Join Token 和 Device Token 仅 Authorization header；
 - 日志不得打印完整 token；
+- Family Join Token 一旦泄露，就具备角色绑定 / takeover 能力，因此后续分享 UI 必须避免长期展示明文；
 - 服务端不信任客户端传入的 role、optional、status 等业务事实；
 - actor role / deviceId 只从认证上下文获取；
 - mutation 必须做 trip scope 校验；
 - takeover 必须原子 revoke old + activate new；
-- Device Token 使用高熵随机值，服务端存 hash；
+- Device Token 使用高熵随机值，服务端长期只存 hash；
 - MySQL 不开放公网；
 - Nginx 只代理明确 API。
 
@@ -1030,7 +1029,7 @@ Today projection
 - 旧 device-token takeover 后立即失效；
 - 新 device-token 可用；
 - client 伪造 role 不改变认证 actor；
-- token 明文不写数据库。
+- token 明文不写长期持久化或日志。
 
 ### Backend — Execution
 
