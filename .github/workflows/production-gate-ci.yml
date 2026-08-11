@@ -1,0 +1,39 @@
+name: QingGan Production Gate CI
+
+on:
+  push:
+    branches:
+      - codex/qinggan-v1-task0-runtime-gate
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'deploy/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/production-gate-ci.yml'
+
+jobs:
+  backend-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      - name: Run backend tests
+        working-directory: backend
+        run: ./mvnw test
+
+      - name: Validate production Compose
+        working-directory: deploy/production
+        run: |
+          cp .env.example .env
+          docker compose config --quiet
+          rm -f .env
