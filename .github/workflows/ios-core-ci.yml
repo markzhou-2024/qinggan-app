@@ -1,0 +1,25 @@
+name: QingGan iOS Core CI
+
+on:
+  push:
+    branches:
+      - codex/qinggan-v1-task0-runtime-gate
+  pull_request:
+    paths:
+      - 'ios/**'
+      - 'QingGanApp.xcodeproj/**'
+      - '.github/workflows/ios-core-ci.yml'
+
+jobs:
+  core-tests:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Swift version
+        run: swift --version
+
+      - name: Run QingGanCore tests
+        run: swift test --package-path ios/QingGanCore
