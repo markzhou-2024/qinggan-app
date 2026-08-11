@@ -45,4 +45,31 @@ final class AppRuntimeConfigurationTests: XCTestCase {
         XCTAssertEqual(configuration.tripID, "debug-trip")
         XCTAssertTrue(configuration.allowsFixtureFallback)
     }
+
+    func testFactoryUsesFixtureOnlyWhenConfigurationExplicitlyAllowsIt() async throws {
+        let configuration = AppRuntimeConfiguration(
+            apiBaseURL: nil,
+            tripID: "qinggan-2026-family",
+            allowsFixtureFallback: true
+        )
+
+        let trip = try await AppTripRepositoryFactory.make(configuration: configuration).itinerary()
+
+        XCTAssertEqual(trip.id, "qinggan-2026-family")
+    }
+
+    func testFactoryWithoutURLAndWithoutFixturePermissionFailsExplicitly() async {
+        let configuration = AppRuntimeConfiguration(
+            apiBaseURL: nil,
+            tripID: "qinggan-2026-family",
+            allowsFixtureFallback: false
+        )
+
+        do {
+            _ = try await AppTripRepositoryFactory.make(configuration: configuration).itinerary()
+            XCTFail("Expected a production configuration failure instead of fixture data")
+        } catch {
+            XCTAssertTrue(error.localizedDescription.contains("生产服务器"))
+        }
+    }
 }
