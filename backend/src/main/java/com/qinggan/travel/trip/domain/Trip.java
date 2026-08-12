@@ -111,4 +111,13 @@ public class Trip {
     public long getRevision() { return revision; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+
+    public void start(LocalDate actualStartDate) {
+        if (status != TripStatus.PLANNING) {
+            throw new IllegalStateException("Trip can only start from PLANNING");
+        }
+        this.status = TripStatus.STARTED;
+        this.actualStartDate = Objects.requireNonNull(actualStartDate);
+        this.revision++;
+    }
 }
