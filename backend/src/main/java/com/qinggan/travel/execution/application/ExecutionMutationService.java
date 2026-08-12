@@ -68,7 +68,7 @@ public class ExecutionMutationService {
         TripExecutionAction existing = actionRepository.findByTripIdAndRequestId(trip.getId(), request.requestId())
             .orElse(null);
         if (existing != null) {
-            ensureSameRequest(existing, ExecutionActionType.START, null);
+            ensureSameRequest(existing, ExecutionActionType.START, null, trip, execution);
             return queryService.snapshot(trip, execution);
         }
         requireExpectedRevision(request.expectedRevision(), execution, trip);
@@ -100,7 +100,7 @@ public class ExecutionMutationService {
         TripExecutionAction existing = actionRepository.findByTripIdAndRequestId(trip.getId(), request.requestId())
             .orElse(null);
         if (existing != null) {
-            ensureSameRequest(existing, actionType, stopId);
+            ensureSameRequest(existing, actionType, stopId, trip, execution);
             return queryService.snapshot(trip, execution);
         }
         requireExpectedRevision(request.expectedRevision(), execution, trip);
@@ -213,10 +213,12 @@ public class ExecutionMutationService {
         }
     }
 
-    private void ensureSameRequest(TripExecutionAction existing, ExecutionActionType actionType, Long stopId) {
+    private void ensureSameRequest(TripExecutionAction existing, ExecutionActionType actionType, Long stopId,
+                                   Trip trip, TripExecution execution) {
         if (existing.getActionType() != actionType || !Objects.equals(existing.getStopId(), stopId)) {
             throw new ExecutionException(HttpStatus.CONFLICT, "IDEMPOTENCY_CONFLICT",
-                "requestId was already used for different execution inputs");
+                "requestId was already used for different execution inputs",
+                queryService.snapshot(trip, execution));
         }
     }
 
