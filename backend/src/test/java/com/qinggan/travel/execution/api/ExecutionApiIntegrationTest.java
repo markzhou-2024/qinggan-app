@@ -232,6 +232,46 @@ class ExecutionApiIntegrationTest {
         org.assertj.core.api.Assertions.assertThat(actions).isEqualTo(1);
     }
 
+    @Test
+    void reusingRequestIdWithDifferentStopSemanticReturnsConflictWithoutMutation() throws Exception {
+        String token = bind(
+            "20000000-0000-0000-0000-000000000008", "FATHER", "execution-device-h", "爸爸的 iPhone");
+        start(token, "30000000-0000-0000-0000-000000000007", 0);
+        String stopId = requiredPlannedStopId();
+        String requestId = "40000000-0000-0000-0000-000000000011";
+
+        mockMvc.perform(post("/api/v1/trips/{tripId}/execution/stops/{stopId}/actions", TRIP, stopId)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(actionRequest(requestId, "COMPLETE", 1)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.revision").value(2))
+            .andExpect(jsonPath("$.stopStates[?(@.stopId == '" + stopId + "')].status", hasItem("COMPLETED")));
+
+        mockMvc.perform(post("/api/v1/trips/{tripId}/execution/stops/{stopId}/actions", TRIP, stopId)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(actionRequest(requestId, "ARRIVE", 2)))
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.code").value("IDEMPOTENCY_CONFLICT"))
+            .andExpect(jsonPath("$.latest.revision").value(2))
+            .andExpect(jsonPath("$.latest.stopStates[?(@.stopId == '" + stopId + "')].status", hasItem("COMPLETED")));
+
+        Integer actions = jdbc.queryForObject("""
+            select count(*) from trip_execution_action a
+            join trip t on t.id = a.trip_id
+            where t.code = ? and a.request_id = ?
+            """, Integer.class, TRIP, requestId);
+        org.assertj.core.api.Assertions.assertThat(actions).isEqualTo(1);
+
+        String persistedStatus = jdbc.queryForObject("""
+            select s.status from trip_stop_execution s
+            join trip t on t.id = s.trip_id
+            where t.code = ? and s.stop_id = ?
+            """, String.class, TRIP, Long.valueOf(stopId));
+        org.assertj.core.api.Assertions.assertThat(persistedStatus).isEqualTo("COMPLETED");
+    }
+
     private String bind(String requestId, String role, String deviceId, String deviceName) throws Exception {
         MvcResult result = mockMvc.perform(post("/api/v1/trips/{tripId}/family/devices/bind", TRIP)
                 .header("Authorization", "Bearer " + JOIN_TOKEN)
