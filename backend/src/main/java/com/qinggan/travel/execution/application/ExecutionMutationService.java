@@ -189,7 +189,11 @@ public class ExecutionMutationService {
             throw new ExecutionException(HttpStatus.BAD_REQUEST, "INVALID_ACTION", "Action is required");
         }
         try {
-            return ExecutionActionType.valueOf(value.trim().toUpperCase(Locale.ROOT));
+            ExecutionActionType action = ExecutionActionType.valueOf(value.trim().toUpperCase(Locale.ROOT));
+            if (action == ExecutionActionType.START) {
+                throw new IllegalArgumentException("START is not a stop action");
+            }
+            return action;
         } catch (IllegalArgumentException exception) {
             throw new ExecutionException(HttpStatus.BAD_REQUEST, "INVALID_ACTION", "Action is not supported");
         }
